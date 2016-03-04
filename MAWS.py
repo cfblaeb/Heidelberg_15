@@ -4,7 +4,6 @@ from simtk import unit
 from pexpect import spawn
 from mpmath import mp as math
 import numpy as np
-from multiprocessing import Pool
 import argparse
 from time import sleep
 
@@ -466,7 +465,7 @@ def initial(ntide):
     print("Aptamer/Ligand complex constructed.")
     print("Loading Aptamer/Ligand complex ...")
 
-    sleep(10) # for some reason a pause is needed here
+    sleep(5)  # for some reason a pause is needed here
 
     aptamer_top = app.AmberPrmtopFile("%s.prmtop" % ntide)
     aptamer_crd = app.AmberInpcrdFile("%s.inpcrd" % ntide)
@@ -476,7 +475,7 @@ def initial(ntide):
     volume = (2 * sample_box) ** 3 * (2 * math.pi) ** 3
     print("Sampling parameter space ...")
     print(ntide)
-    en_pos_xyz = [initial_sample(aptamer_top, aptamer_crd, _NINIT, i, box=sample_box, rang=ligand_range) for i in range(100)]
+    en_pos_xyz = [initial_sample(aptamer_top, aptamer_crd, _NINIT, i, box=sample_box, rang=ligand_range) for i in range(1)] # RESET TO AFTER TESTING!!!100)]
 
     print("done.")
     print("Harvesting results ...")
@@ -516,6 +515,8 @@ def step(array):
     internal.unify(identifier)
     internal.command("saveamberparm union %s.prmtop %s.inpcrd" % (identifier, identifier))
 
+    sleep(5)  # for some reason a pause is needed here
+
     print("Identifier: " + Ntides)
 
     volume = (2 * math.pi) ** 5
@@ -550,14 +551,11 @@ def loop():
     print(alphabet)
     print("Choosing from candidates ...")
 
-    #pos_Nt_S_task = pool.map(initial, alphabet)
-    #pos_Nt_S = pos_Nt_S_task
     pos_Nt_S = []
     for al in alphabet:
         pos_Nt_S.append(initial(al))
 
     positions = [elem[0] for elem in pos_Nt_S]
-
     lntides = [elem[1] for elem in pos_Nt_S]
     entropies = [elem[2] for elem in pos_Nt_S]
 
@@ -568,7 +566,7 @@ def loop():
     for elem in pos_nt:
         positions.append(elem[0])
         lntides.append(elem[1])
-    positions = positions
+
     print([len(elem) for elem in positions])
 
     print("Chosen nucleotides: ")
@@ -582,19 +580,15 @@ def loop():
         else:
             print("Initializing %sth step ..." % (i + 2))
 
-        pool = Pool(6)
-        pos_Nt_S_tasks = pool.map(step,
-                                  [[alem, blem.replace("3", "").replace("N", "5").strip() + ntide, 1] for alem, blem in
-                                   zip(positions, lntides) for ntide in [" DG3", " DA3", " DT3", " DC3"]])
+        pos_Nt_S = []
+        for ak in [[alem, blem.replace("3", "").replace("N", "5").strip() + ntide, 1] for alem, blem in zip(positions, lntides) for ntide in [" DG3", " DA3", " DT3", " DC3"]]:
+            pos_Nt_S.append(step(ak))
 
-        pos_Nt_S = pos_Nt_S_tasks
         positions = [elem[0] for elem in pos_Nt_S]
-        positions = positions
         lntides = [elem[1] for elem in pos_Nt_S]
         entropies = [elem[2] for elem in pos_Nt_S]
 
-        pos_Nt_task = evaluate(positions, lntides, entropies, threshold=0.005)
-        pos_nt = pos_Nt_task
+        pos_nt = evaluate(positions, lntides, entropies, threshold=0.005)
         lntides = []
         positions = []
         for elem in pos_nt:
@@ -617,6 +611,8 @@ def result(pos_Nt):
         internal.sequence(identifier, elem[1])
         internal.unify(identifier)
         internal.command("saveamberparm union Aptamer%s.prmtop Aptamer%s.inpcrd" % (count, count))
+
+        sleep(5)
 
     print("Run successful! Have fun with your Aptamers")
     return 1
