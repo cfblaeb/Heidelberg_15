@@ -475,7 +475,7 @@ def initial(ntide):
     volume = (2 * sample_box) ** 3 * (2 * math.pi) ** 3
     print("Sampling parameter space ...")
     print(ntide)
-    en_pos_xyz = [initial_sample(aptamer_top, aptamer_crd, _NINIT, i, box=sample_box, rang=ligand_range) for i in range(1)] # RESET TO AFTER TESTING!!!100)]
+    en_pos_xyz = [initial_sample(aptamer_top, aptamer_crd, _NINIT, i, box=sample_box, rang=ligand_range) for i in range(100)] # RESET TO AFTER TESTING!!!100)]
 
     print("done.")
     print("Harvesting results ...")
