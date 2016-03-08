@@ -618,9 +618,7 @@ def result(pos_Nt):
     return 1
 
 
-parser = argparse.ArgumentParser(description='MAWS - Make Aptamers Without SELEX',
-                                 formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-parser.add_argument('path', metavar='PATH', help='Path to the calculation directory.')
+parser = argparse.ArgumentParser(description='MAWS - Make Aptamers Without SELEX', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument('infile', metavar='INFILE', help='3D structure of the ligand.')
 parser.add_argument('-b', '--beta', type=float, default=0.01, help='lagrange multiplier beta.')
 parser.add_argument('-i', '--ninit', type=int, default=200, help='number of initial steps as multiple of 100.')
